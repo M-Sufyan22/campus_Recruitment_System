@@ -1,21 +1,38 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Platform, StatusBar, SafeAreaView } from "react-native";
+import { Provider } from "react-redux";
+import store from "./src/store";
+import firebase from "./src/config/firebase";
+import Navigation from "./src/config/Navigation";
+import LoginSignup from "./src/screens/LoginSignup";
 
 export default function App() {
+  const [userIsLogin, setUserIsLogin] = useState(false);
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        console.log(user.email);
+        setUserIsLogin(true);
+      } else {
+        console.log("no user found");
+        setUserIsLogin(false);
+      }
+    });
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Provider store={store}>
+      <SafeAreaView style={styles.container}>
+        {userIsLogin ? <Navigation /> : <LoginSignup />}
+      </SafeAreaView>
+    </Provider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
 });
